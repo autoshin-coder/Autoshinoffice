@@ -93,6 +93,23 @@ import {
   withCodexRemoteArgs
 } from '../shared/codexRemote';
 
+// The app was renamed from "Munder Difflin" to "Autoshinoffice", which moves
+// Electron's default userData folder. Keep using the old folder (config,
+// harness.db, localStorage) when it exists and the new one does not yet, so
+// the rename does not silently reset an existing install.
+{
+  const appData = app.getPath('appData');
+  const current = app.getPath('userData');
+  // Electron creates the userData dir before this runs, so test for real app
+  // state (harness.db) rather than the folder itself.
+  if (!existsSync(join(current, 'harness.db'))) {
+    const legacy = ['munder-difflin', 'Munder Difflin']
+      .map((n) => join(appData, n))
+      .find((p) => existsSync(p));
+    if (legacy) app.setPath('userData', legacy);
+  }
+}
+
 const isDev = !!process.env.ELECTRON_RENDERER_URL;
 
 // Keep the main process alive on an unexpected throw/rejection. The harness is a
@@ -1406,7 +1423,7 @@ function buildAutonomousRequestProtocol(channel: string, threadTs: string, helpe
 2. DELEGATE WITH THE REPLY HANDLE — tell that agent to do the work autonomously AND to post its result back to THIS Slack thread itself when done, using exactly: "${hive.nodeCommand()}" "${helperPath}" --channel ${channel} --thread ${threadTs} --text "<substantive result>" (that first path is the harness's bundled Node, already resolved for this machine — pass it verbatim; bare "node" is not on the hook/agent PATH on many machines.)
 3. AUTONOMOUS EXECUTION — no interactive questions. PAUSE/ask ONLY for high-severity actions: pushing to main or any remote; buying or spawning infrastructure or paid services; deleting an existing repo, file, or folder it did not create. Stay READ-ONLY at critical infrastructure and git-push-type changes unless explicitly approved.
 4. DIRECT, SUBSTANTIVE REPLY — the agent posts a real Slack-mrkdwn answer (short *bold* headline + the actual outcome/specifics/links), NEVER a bare "done"/":white_check_mark:".
-5. REPORT TO GOD — the agent then tells you (Michael) what it did.
+5. REPORT TO GOD — the agent then tells you (Daniel) what it did.
 6. ASYNC QUESTIONS — if a decision is genuinely needed, don't block: post the question + numbered OPTIONS to the thread via that reply command, and record {q, options, askedAt (ISO + day & time), thread_ts ${threadTs}} so the threaded human reply correlates back and resumes.
 The user's message starts now: `;
 }
@@ -2318,7 +2335,7 @@ function createWindow(opts: { floor?: boolean } = {}): BrowserWindow {
     ...(geom && geom.x !== undefined && geom.y !== undefined ? { x: geom.x, y: geom.y } : {}),
     minWidth: MIN_WIN.width,
     minHeight: MIN_WIN.height,
-    title: isFloor ? 'Munder Difflin — Floor' : 'Munder Difflin',
+    title: isFloor ? 'Autoshinoffice — Floor' : 'Autoshinoffice',
     backgroundColor: '#FFF8E7',
     titleBarStyle: 'hiddenInset',
     show: false,

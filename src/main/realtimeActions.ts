@@ -219,7 +219,7 @@ function resolveAgent(target: string, reg: Registry): ResolvedAgent | { error: s
   const byId = entries.find(([id]) => id.toLowerCase() === t);
   if (byId) return mk(byId[0], byId[1]);
   // 'god' / 'michael' alias for the orchestrator
-  if ((t === 'god' || t === 'michael' || t === 'the god') && reg.godId)
+  if ((t === 'god' || t === 'michael' || t === 'daniel' || t === 'the god') && reg.godId)
     return mk(reg.godId, reg.agents[reg.godId] ?? {});
   // exact name, prefer live
   const byName = entries.filter(([, m]) => (m.name || '').toLowerCase() === t);
